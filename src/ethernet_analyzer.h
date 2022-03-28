@@ -9,4 +9,6 @@
 #include "uart.h"
 #include "spi.h"
 
+#define SPI_SLAVE
+
 #endif /* __ETHERNET_ANALYZER_H__ */

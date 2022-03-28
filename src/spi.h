@@ -9,8 +9,7 @@
 
 void initSpiMaster(void);
 void initSpiSlave(void);
-void spiWriteByte(byte_t b);
-byte_t spiReadByte(void);
+byte_t spiTransferByte(byte_t b);
 void selectSlave(void);
 void deselectSlave(void);
 

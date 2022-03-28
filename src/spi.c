@@ -1,49 +1,41 @@
-#include "shared.h"
-
+#include "spi.h"
 
 void initSpiMaster(void)
 {
 	initSpi();
-	*pSPI_CTL |= (MSTR | !EMISO);
+	*pSPI_CTL |= MSTR;
+	deselectSlave();
 }
 
 void initSpiSlave(void)
 {
 	initSpi();
-	*pSPI_CTL |= (!MSTR | !EMISO);
+	*pSPI_CTL |= !MSTR;
 }
 
-static void initSpi(void)
+void initSpi(void)
 {
-	*pSPI_CTL = (SPE | !SIZE | 0x01);
+	*pSPI_CTL = (SPE | !SIZE | EMISO | 0x01);
 	*pSPI_BAUD = 0x19;
 	// 25
 }
 
 void selectSlave(void)
 {
-	// gpio low
+	*pPORTFIO &= ~PF10;
 }
 
 void deselectSlave(void)
 {
-	// gpio high
+	*pPORTFIO |= PF10;
 }
 
-void makeSlave(void)
+byte_t spiTransferByte(byte_t b)
 {
-	*pSPI_CTL |= (!MSTR | EMISO);
-}
-
-
-void spiWriteByte(byte_t b)
-{
-	while ((*pSPI_STAT & TXS) != 0);
+	byte_t r;
 	*pSPI_TDBR = b;
-}
-
-byte_t spiReadByte(void)
-{
-	// to be implemented
-	return 0;
+	while ((*pSPI_STAT & TXS) != 0);
+	while ((*pSPI_STAT & SPIF) == 0);
+	r = *pSPI_RDBR;
+	return r;
 }

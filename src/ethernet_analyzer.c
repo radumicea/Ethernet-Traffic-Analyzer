@@ -5,6 +5,7 @@
 #include "ethernet_analyzer.h"
 
 /*
+ GPIO - PF10
  MOSI - PF11 - P9_5
  MISO - PF12 - P9_6
  SCK  - PF13 - P9_8
@@ -12,7 +13,12 @@
  */
 void initPins(void)
 {
-	*pPORTF_FER = 0x0003 | PF11 | PF12 | PF13;
+#ifdef SPI_SLAVE
+	*pPORTF_FER = PF11 | PF12 | PF13 | PF14;
+#else
+	*pPORTF_FER = PF11 | PF12 | PF13;
+#endif
+	*pPORTFIO_DIR |= PF10;
 	*pPORT_MUX = 0x0000;
 }
 
@@ -28,14 +34,17 @@ int main(void)
 		uartWriteByte(++ch);
 	}
 	 */
-
-	initSpi();
-
+#ifdef SPI_SLAVE
+	initSpiSlave();
+#else
+	initSpiMaster();
+#endif
 	while (true)
 	{
 		selectSlave();
-		spiWriteByte('a');
+		spiTransferByte('a');
 		deselectSlave();
+		sleep(1000);
 	}
 
 
